@@ -5,8 +5,15 @@ import gtk
 import appindicator
 import pynotify
 
+from piWindow import PIWindow 
+from screenManager import ScreenManager
+
+manager = ScreenManager()
+window_handle = PIWindow(manager.get_active_window())	
+(usable_width,usable_height,xorigin, yorigin)=manager.get_usable_size()
+
 class PlaceItIndicator:
-	
+    
     def __init__(self):
         self.ind = appindicator.Indicator ("example-simple-client", "indicator-messages", appindicator.CATEGORY_APPLICATION_STATUS)
         self.ind.set_status (appindicator.STATUS_ACTIVE)
@@ -14,19 +21,26 @@ class PlaceItIndicator:
         self.ind.set_icon("distributor-logo")
         
         self.menu = gtk.Menu()
+        
+        agr = gtk.AccelGroup()
 
 	#Add menu items
 	#First Batch	 Maximize,Minimize,Restore
         menuMaximize = gtk.MenuItem("Maximize")
         menuMaximize.connect("activate", self.win_maximize,"Maximize")
+        
         self.menu.append(menuMaximize)
         
         menuMinimize = gtk.MenuItem("Minimize")
+        key, mod = gtk.accelerator_parse("<Ctrl><Alt>N")
+        menuMinimize.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         menuMinimize.connect("activate", self.win_minimize,"Minimize")
+        
+         
         self.menu.append(menuMinimize)
         
         menuRestore = gtk.MenuItem("Restore")
-        menuRestore.connect("activate", self.win_restore,"Restore")
+        menuRestore.connect("activate",self.win_restore,"Restore")
         self.menu.append(menuRestore)
         
         seperator1 = gtk.SeparatorMenuItem()
@@ -69,6 +83,10 @@ class PlaceItIndicator:
         menuLowLeft.connect("activate", self.win_lowLeft,"lowerLeft")
         self.menu.append(menuLowLeft)
         
+        menuCenter = gtk.MenuItem("Center")
+        menuCenter.connect("activate", self.win_center,"center")
+        self.menu.append(menuCenter)
+        
         seperator3 = gtk.SeparatorMenuItem()
         self.menu.append(seperator3)
         
@@ -95,37 +113,59 @@ class PlaceItIndicator:
         gtk.main_quit()
        
     def win_maximize(self, widget, param):
-           print param
+	window_handle.maximize()
+        print param
 
     def win_minimize(self, widget, param):
-           print param
+    	window_handle.minimize()
+        print param
 
     def win_restore(self, widget, param):
-           print param
+        window_handle.unmaximize()
+        print param
+        
+    def win_center(self, widget, param):
+    	(xPos, yPos, curWidth, curHeight) = window_handle.get_window_size()
+    	window_handle.resize( (((usable_width/2)+xorigin)-(curWidth/2)), (((usable_height/2)+yorigin)-(curHeight/2)), curWidth, curHeight)
+    	print param
+    	#(xPos, yPos, curWidth, curHeight) = self._window.get_geometry()
+    	#window_handle.resize( (((usable_width/2)+xorigin)-(curWidth/2)), (((usable_height/2)+yorigin)-(curHeight/2)), curWidth, curHeight)
+	
 
     def win_right(self, widget, param):
-           print param
+    	window_handle.resize((usable_width/2)+xorigin, yorigin, usable_width/2, usable_height)
+    	print ((usable_width/2)+xorigin, yorigin, usable_width/2, usable_height)
+        print param
 
     def win_left(self, widget, param):
-           print param
+	window_handle.resize(xorigin, yorigin, usable_width/2, usable_height)
+    	print (xorigin, yorigin, usable_width/2, usable_height)
+        print param
 
     def win_top(self, widget, param):
-           print param
+    	window_handle.resize(xorigin, yorigin,usable_width,usable_height/2)
+        print param
 
     def win_down(self, widget, param):
-           print param
+    	window_handle.resize(xorigin, (usable_height/2)+yorigin,usable_width,usable_height/2)
+    	print (xorigin, (usable_height/2)+yorigin,usable_width,usable_height/2)
+        print param
 
     def win_upRight(self, widget, param):
-           print param
+    	window_handle.resize((usable_width/2)+xorigin, yorigin, usable_width/2, usable_height/2)
+        print param
 
     def win_upLeft(self, widget, param):
-           print param
+        window_handle.resize(xorigin, yorigin, usable_width/2, usable_height/2)
+        print param
 
     def win_lowRight(self, widget, param):
-           print param
+    	window_handle.resize((usable_width/2)+xorigin, (usable_height/2)+yorigin, usable_width/2, usable_height/2)
+        print param
 
     def win_lowLeft(self, widget, param):
-           print param
+    	window_handle.resize(xorigin, (usable_height/2)+yorigin, usable_width/2, usable_height/2)
+        print param
 
     def win_about(self, widget, param):
            print param
